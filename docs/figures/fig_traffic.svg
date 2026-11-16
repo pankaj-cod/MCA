@@ -1,0 +1,79 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 300' width='640' height='300' font-family='Helvetica, Arial, sans-serif'>
+<rect width='640' height='300' fill='white'/>
+<text x='52' y='18' font-size='13' font-weight='bold' fill='#1f2937'>Main-memory traffic (32-bit words transferred)</text>
+<line x1='52' x2='628' y1='236.0' y2='236.0' stroke='#e5e7eb'/>
+<text x='47' y='239.0' font-size='9' text-anchor='end' fill='#6b7280'>0</text>
+<line x1='52' x2='628' y1='198.0' y2='198.0' stroke='#e5e7eb'/>
+<text x='47' y='201.0' font-size='9' text-anchor='end' fill='#6b7280'>1200</text>
+<line x1='52' x2='628' y1='160.0' y2='160.0' stroke='#e5e7eb'/>
+<text x='47' y='163.0' font-size='9' text-anchor='end' fill='#6b7280'>2400</text>
+<line x1='52' x2='628' y1='122.0' y2='122.0' stroke='#e5e7eb'/>
+<text x='47' y='125.0' font-size='9' text-anchor='end' fill='#6b7280'>3600</text>
+<line x1='52' x2='628' y1='84.0' y2='84.0' stroke='#e5e7eb'/>
+<text x='47' y='87.0' font-size='9' text-anchor='end' fill='#6b7280'>4800</text>
+<line x1='52' x2='628' y1='46.0' y2='46.0' stroke='#e5e7eb'/>
+<text x='47' y='49.0' font-size='9' text-anchor='end' fill='#6b7280'>6000</text>
+<text transform='translate(13,141.0) rotate(-90)' font-size='10' text-anchor='middle' fill='#6b7280'>words</text>
+<rect x='66.1' y='235.0' width='26.0' height='1.0' fill='#1d4ed8' rx='1'/>
+<rect x='66.1' y='234.0' width='26.0' height='1.0' fill='#93c5fd' rx='1'/>
+<text x='79.1' y='231.0' font-size='8' text-anchor='middle' fill='#1f2937'>64</text>
+<rect x='94.1' y='226.9' width='26.0' height='9.1' fill='#ea580c' rx='1'/>
+<text x='107.1' y='223.9' font-size='8' text-anchor='middle' fill='#1f2937'>288</text>
+<text x='93.1' y='250' font-size='9.5' font-weight='bold' text-anchor='middle' fill='#1f2937'>W1</text>
+<text x='93.1' y='262' font-size='8' text-anchor='middle' fill='#6b7280'>Loop RMW</text>
+<text x='93.1' y='272' font-size='8' text-anchor='middle' fill='#6b7280'>(32w x8)</text>
+<rect x='148.4' y='203.6' width='26.0' height='32.4' fill='#1d4ed8' rx='1'/>
+<text x='161.4' y='200.6' font-size='8' text-anchor='middle' fill='#1f2937'>1024</text>
+<rect x='176.4' y='203.6' width='26.0' height='32.4' fill='#ea580c' rx='1'/>
+<text x='189.4' y='200.6' font-size='8' text-anchor='middle' fill='#1f2937'>1024</text>
+<text x='175.4' y='250' font-size='9.5' font-weight='bold' text-anchor='middle' fill='#1f2937'>W2</text>
+<text x='175.4' y='262' font-size='8' text-anchor='middle' fill='#6b7280'>Seq read</text>
+<text x='175.4' y='272' font-size='8' text-anchor='middle' fill='#6b7280'>stream</text>
+<rect x='230.7' y='89.3' width='26.0' height='146.7' fill='#1d4ed8' rx='1'/>
+<rect x='230.7' y='88.8' width='26.0' height='0.5' fill='#93c5fd' rx='1'/>
+<text x='243.7' y='85.8' font-size='8' text-anchor='middle' fill='#1f2937'>4648</text>
+<rect x='258.7' y='150.6' width='26.0' height='85.4' fill='#ea580c' rx='1'/>
+<text x='271.7' y='147.6' font-size='8' text-anchor='middle' fill='#1f2937'>2698</text>
+<text x='257.7' y='250' font-size='9.5' font-weight='bold' text-anchor='middle' fill='#1f2937'>W3</text>
+<text x='257.7' y='262' font-size='8' text-anchor='middle' fill='#6b7280'>Random 70R/30W</text>
+<text x='257.7' y='272' font-size='8' text-anchor='middle' fill='#6b7280'>2KiB</text>
+<rect x='313.0' y='142.9' width='26.0' height='93.1' fill='#1d4ed8' rx='1'/>
+<rect x='313.0' y='141.8' width='26.0' height='1.1' fill='#93c5fd' rx='1'/>
+<text x='326.0' y='138.8' font-size='8' text-anchor='middle' fill='#1f2937'>2976</text>
+<rect x='341.0' y='182.7' width='26.0' height='53.3' fill='#ea580c' rx='1'/>
+<text x='354.0' y='179.7' font-size='8' text-anchor='middle' fill='#1f2937'>1683</text>
+<text x='340.0' y='250' font-size='9.5' font-weight='bold' text-anchor='middle' fill='#1f2937'>W3b</text>
+<text x='340.0' y='262' font-size='8' text-anchor='middle' fill='#6b7280'>Random 70R/30W</text>
+<text x='340.0' y='272' font-size='8' text-anchor='middle' fill='#6b7280'>512B</text>
+<rect x='395.3' y='235.0' width='26.0' height='1.0' fill='#1d4ed8' rx='1'/>
+<rect x='395.3' y='234.0' width='26.0' height='1.0' fill='#93c5fd' rx='1'/>
+<text x='408.3' y='231.0' font-size='8' text-anchor='middle' fill='#1f2937'>64</text>
+<rect x='423.3' y='219.2' width='26.0' height='16.8' fill='#ea580c' rx='1'/>
+<text x='436.3' y='216.2' font-size='8' text-anchor='middle' fill='#1f2937'>530</text>
+<text x='422.3' y='250' font-size='9.5' font-weight='bold' text-anchor='middle' fill='#1f2937'>W4</text>
+<text x='422.3' y='262' font-size='8' text-anchor='middle' fill='#6b7280'>Hot set</text>
+<text x='422.3' y='272' font-size='8' text-anchor='middle' fill='#6b7280'>128B 50W</text>
+<rect x='477.6' y='173.2' width='26.0' height='62.8' fill='#1d4ed8' rx='1'/>
+<rect x='477.6' y='171.1' width='26.0' height='2.0' fill='#93c5fd' rx='1'/>
+<text x='490.6' y='168.1' font-size='8' text-anchor='middle' fill='#1f2937'>2048</text>
+<rect x='505.6' y='203.6' width='26.0' height='32.4' fill='#ea580c' rx='1'/>
+<text x='518.6' y='200.6' font-size='8' text-anchor='middle' fill='#1f2937'>1024</text>
+<text x='504.6' y='250' font-size='9.5' font-weight='bold' text-anchor='middle' fill='#1f2937'>W5</text>
+<text x='504.6' y='262' font-size='8' text-anchor='middle' fill='#6b7280'>Seq write</text>
+<text x='504.6' y='272' font-size='8' text-anchor='middle' fill='#6b7280'>stream</text>
+<rect x='559.9' y='171.3' width='26.0' height='64.7' fill='#1d4ed8' rx='1'/>
+<rect x='559.9' y='171.1' width='26.0' height='0.1' fill='#93c5fd' rx='1'/>
+<text x='572.9' y='168.1' font-size='8' text-anchor='middle' fill='#1f2937'>2048</text>
+<rect x='587.9' y='227.9' width='26.0' height='8.1' fill='#ea580c' rx='1'/>
+<text x='600.9' y='224.9' font-size='8' text-anchor='middle' fill='#1f2937'>256</text>
+<text x='586.9' y='250' font-size='9.5' font-weight='bold' text-anchor='middle' fill='#1f2937'>W6</text>
+<text x='586.9' y='262' font-size='8' text-anchor='middle' fill='#6b7280'>Conflict thrash</text>
+<text x='586.9' y='272' font-size='8' text-anchor='middle' fill='#6b7280'></text>
+<line x1='52' x2='628' y1='236.0' y2='236.0' stroke='#1f2937'/>
+<rect x='52' y='28' width='10' height='10' fill='#1d4ed8' rx='1'/>
+<text x='66' y='37' font-size='10' fill='#1f2937'>Write-back (during run)</text>
+<rect x='210.79999999999998' y='28' width='10' height='10' fill='#93c5fd' rx='1'/>
+<text x='224.79999999999998' y='37' font-size='10' fill='#1f2937'>WB final flush of dirty lines</text>
+<rect x='403.19999999999993' y='28' width='10' height='10' fill='#ea580c' rx='1'/>
+<text x='417.19999999999993' y='37' font-size='10' fill='#1f2937'>Write-through</text>
+</svg>
