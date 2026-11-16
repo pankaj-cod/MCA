@@ -1,0 +1,8 @@
+workload,accesses,wb_hits,wb_misses,wb_writebacks,wb_rd_txn,wb_wr_txn,wb_rd_words,wb_wr_words,wb_flush_words,wb_cycles,wt_hits,wt_misses,wt_rd_txn,wt_wr_txn,wt_rd_words,wt_wr_words,wt_cycles
+W1 Loop RMW (32w x8),512,504,8,0,8,0,32,0,32,1128,504,8,8,256,32,256,4200
+W2 Seq read stream,1024,768,256,0,256,0,1024,0,0,5376,768,256,256,0,1024,0,5376
+W3 Random 70R/30W 2KiB,1000,127,873,285,873,285,3492,1140,16,16769,128,872,599,302,2396,302,13411
+W3b Random 70R/30W 512B,1000,486,514,221,514,221,2056,884,36,11334,494,506,347,295,1388,295,10051
+W4 Hot set 128B 50W,1000,992,8,0,8,0,32,0,32,2104,983,17,8,498,32,498,8080
+W5 Seq write stream,1024,768,256,240,256,240,1024,960,64,8256,0,1024,0,1024,0,1024,14336
+W6 Conflict thrash,256,0,256,255,256,255,1024,1020,4,6900,0,256,0,256,0,256,3584
