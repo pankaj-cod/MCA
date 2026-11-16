@@ -1,0 +1,59 @@
+% ============================================================================
+%  Phase I Report -- Write-Back Cache Controller (IEEE conference format)
+% ============================================================================
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{../docs/figures/}{figures/}}
+
+\begin{document}
+
+\title{Design and Verification of a Direct-Mapped\\Write-Back Cache Controller in Verilog HDL\\
+{\large Phase I Report -- Modern Computer Architecture, Project 8}\\ {\large\itshape Group: Khel Khatam}}
+
+\author{
+\IEEEauthorblockN{Pankaj Upadhyay}
+\IEEEauthorblockA{Roll No. 2401010317\\ MCA}
+\and
+\IEEEauthorblockN{Prakhar Rawat}
+\IEEEauthorblockA{Roll No. 2401020045\\ MCA}
+\and
+\IEEEauthorblockN{Harshit Kudhial}
+\IEEEauthorblockA{Roll No. 2401010182\\ MCA}
+\and
+\IEEEauthorblockN{Om Chimurkar}
+\IEEEauthorblockA{Roll No. 2401010306\\ MCA}
+\and
+\IEEEauthorblockN{Vishuti Jamwal}
+\IEEEauthorblockA{Roll No. 2401010506\\ MCA}
+}
+
+\maketitle
+
+\begin{abstract}
+Main-memory bandwidth is a scarce resource, and every store that a cache forwards
+to memory consumes it. This project designs, implements and verifies a
+direct-mapped \emph{write-back, write-allocate} cache controller in synthesizable
+Verilog HDL. The design is partitioned into a Cache Data RAM, Tag RAM, Valid RAM,
+Dirty-Bit RAM, Tag Comparator, a four-state controller FSM (\textsc{Idle},
+\textsc{Compare}, \textsc{Write-Back}, \textsc{Allocate}) and a block-transfer
+Memory Interface.
+\end{abstract}
+
+\section{Introduction}
+Modern processors execute orders of magnitude faster than off-chip dynamic RAM can
+respond, making the memory wall one of the defining bottlenecks of computer
+architecture. Caches alleviate this latency gap by exploiting temporal and spatial
+locality.
+
+\section{System Architecture Overview}
+The design targets a 32-bit byte address space partitioned as follows:
+24-bit Tag [31:8], 4-bit Index [7:4], 2-bit Word select [3:2], and 2-bit Byte offset [1:0].
+
+\end{document}
