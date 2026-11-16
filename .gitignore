@@ -1,0 +1,5 @@
+.DS_Store
+sim/*.vvp
+*.aux
+*.log.tex
+*.synctex.gz
