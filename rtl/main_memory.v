@@ -1,9 +1,11 @@
 // ============================================================================
-// main_memory.v : Behavioural main-memory model with fixed latency
+// main_memory.v : Behavioural main-memory model with fixed latency and
+//                 memory-traffic counters (simulation model).
 // ----------------------------------------------------------------------------
 //  - 4096 blocks x 128 bit (64 KiB). Block address = byte address >> 4.
 //  - Each transaction takes LATENCY cycles, then mem_ready pulses for 1 cycle.
 //  - Word-granular write mask so a write-through cache can store one word.
+//  - Counters: transactions and 32-bit words moved in each direction.
 //  - Initial content: word at word-address W holds 32'hA000_0000 | W.
 // ============================================================================
 `timescale 1ns/1ps
@@ -22,7 +24,7 @@ module main_memory #(
     input  wire [`WORDS_PB-1:0] mem_wmask,
     output reg  [`LINE_W-1:0]   mem_rdata,
     output reg                  mem_ready,
-    // traffic statistics stubs
+    // traffic statistics
     output reg  [31:0]          rd_txn,
     output reg  [31:0]          wr_txn,
     output reg  [31:0]          rd_words,
@@ -38,6 +40,7 @@ module main_memory #(
     reg [`LINE_W-1:0]   l_wdata;
     reg [`WORDS_PB-1:0] l_mask;
 
+    // ---- (re)load the reference pattern; callable from the testbench ----
     task init;
         integer b, w;
         begin
@@ -48,6 +51,10 @@ module main_memory #(
     endtask
     initial init;
 
+    function [2:0] popcnt4(input [3:0] m);
+        popcnt4 = m[0] + m[1] + m[2] + m[3];
+    endfunction
+
     integer w;
     always @(posedge clk) begin
         if (rst) begin
@@ -57,14 +64,19 @@ module main_memory #(
         end else begin
             mem_ready <= 1'b0;
             if (busy) begin
+                busy_cycles <= busy_cycles + 1;
                 if (cnt == LATENCY-1) begin
                     busy      <= 1'b0;
                     mem_ready <= 1'b1;
                     if (l_we) begin
                         for (w = 0; w < `WORDS_PB; w = w + 1)
                             if (l_mask[w]) mem[l_addr][w*32 +: 32] <= l_wdata[w*32 +: 32];
+                        wr_txn   <= wr_txn + 1;
+                        wr_words <= wr_words + popcnt4(l_mask);
                     end else begin
                         mem_rdata <= mem[l_addr];
+                        rd_txn    <= rd_txn + 1;
+                        rd_words  <= rd_words + `WORDS_PB;
                     end
                 end else
                     cnt <= cnt + 1;
