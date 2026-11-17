@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 // ============================================================================
-// wb_fsm.v : Write-Back Cache Controller FSM (Scaffold)
+// wb_fsm.v : Write-Back Cache Controller FSM
 // ----------------------------------------------------------------------------
 //  States: IDLE, COMPARE, WRITE_BACK, ALLOCATE
 // ============================================================================
@@ -69,7 +69,39 @@ module wb_fsm (
                 next_state = COMPARE;
             end
         end
-        default: next_state = IDLE;
+
+        COMPARE: begin
+            if (hit) begin
+                ev_hit = first_cmp;
+                done   = 1'b1;
+                if (req_we) begin
+                    data_we_word = 1'b1;
+                    dirty_set    = 1'b1;     // block now differs from memory
+                end
+                next_state = IDLE;
+            end else begin
+                ev_miss = first_cmp;
+                if (victim_valid && victim_dirty) begin
+                    ev_writeback = 1'b1;
+                    next_state   = WRITE_BACK;
+                end else begin
+                    next_state   = ALLOCATE;
+                end
+            end
+        end
+
+        WRITE_BACK: begin
+            mem_wr = 1'b1;                   // old block -> memory first
+            if (mem_ready) next_state = ALLOCATE;
+        end
+
+        ALLOCATE: begin
+            mem_rd = 1'b1;                   // then fetch the new block
+            if (mem_ready) begin
+                refill     = 1'b1;
+                next_state = COMPARE;
+            end
+        end
         endcase
     end
 endmodule
