@@ -302,8 +302,38 @@ module tb_cache;
         check(wbm_wr_txn == 0 && wbm_rd_txn == 1, "T4 WB: writes absorbed by cache");
         check(wtm_wr_txn == 4, "T4 WT: 4 single-word memory writes");
 
+        // T5 -------------------------------------------------- dirty eviction
+        $display("T5  read conflict miss on DIRTY line -> WRITE_BACK then ALLOCATE");
+        rd(mk(24'h1, 4'd1, 2'd0));
+        check(wb_wbs == 1, "T5 one write-back performed");
+        check(wbm_wr_txn == 1 && wbm_rd_txn == 2, "T5 1 block write + 1 block read");
+        check(memword_wb(mk(24'h0,4'd1,2'd0)) == 32'hDEAD_0000 &&
+              memword_wb(mk(24'h0,4'd1,2'd1)) == 32'hDEAD_0001 &&
+              memword_wb(mk(24'h0,4'd1,2'd2)) == 32'hDEAD_0002 &&
+              memword_wb(mk(24'h0,4'd1,2'd3)) == 32'hDEAD_0003, "T5 old dirty block landed in memory");
+        check(u_wb.u_dirty.dirty[1] == 0 && u_wb.u_tag.mem[1] == 24'h1, "T5 new line clean, new tag");
+
+        // T6 -------------------------------------------------- clean eviction
+        $display("T6  read back evicted data (clean victim -> no write-back)");
+        rd(mk(24'h0, 4'd1, 2'd1));
+        check(wb_wbs == 1 && wbm_wr_txn == 1, "T6 clean victim not written back");
+
+        // T7 -------------------------------------------------- write miss, clean
+        $display("T7  write miss on invalid line -> allocate + write (write-allocate)");
+        wr(mk(24'h0, 4'd2, 2'd3), 32'hBEEF_0023);
+        check(u_wb.u_valid.valid[2] && u_wb.u_dirty.dirty[2], "T7 WB: line allocated and dirty");
+        check(u_wb.u_data.mem[2][3*32 +: 32] == 32'hBEEF_0023, "T7 WB: word written into refilled line");
+        check(u_wt.u_valid.valid[2] == 0, "T7 WT: no-write-allocate keeps line invalid");
+
+        // T8 -------------------------------------------------- write miss, dirty
+        $display("T8  write miss on DIRTY line -> WRITE_BACK, ALLOCATE, write");
+        wr(mk(24'h5, 4'd2, 2'd0), 32'hCAFE_0520);
+        check(wb_wbs == 2, "T8 write-back counted");
+        check(memword_wb(mk(24'h0,4'd2,2'd3)) == 32'hBEEF_0023, "T8 evicted dirty word in memory");
+        check(u_wb.u_dirty.dirty[2] && u_wb.u_tag.mem[2] == 24'h5, "T8 new line dirty with new tag");
+
         
-        $display("\nDirected tests T0-T4 complete. All checks passed.");
+        $display("\nDirected tests T0-T8 complete. All checks passed.");
         $finish;
     end
 endmodule
