@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 400" width="680" height="400" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f2937"/>
+    </marker>
+  </defs>
+  <rect width="680" height="400" fill="white"/>
+  <!-- cache boundary -->
+  <rect x="120" y="20" width="420" height="365" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="5,3"/>
+  <text x="130" y="38" font-size="11" fill="#475569" font-weight="bold">wb_cache_top</text>
+
+  <!-- CPU -->
+  <rect x="12" y="140" width="80" height="100" rx="6" fill="#e0e7ff" stroke="#1f2937"/>
+  <text x="52" y="186" font-size="13" font-weight="bold" text-anchor="middle">CPU</text>
+  <text x="52" y="202" font-size="9" text-anchor="middle" fill="#475569">(testbench)</text>
+
+  <!-- main memory -->
+  <rect x="580" y="140" width="88" height="100" rx="6" fill="#fef3c7" stroke="#1f2937"/>
+  <text x="624" y="182" font-size="12" font-weight="bold" text-anchor="middle">Main</text>
+  <text x="624" y="197" font-size="12" font-weight="bold" text-anchor="middle">Memory</text>
+  <text x="624" y="213" font-size="9" text-anchor="middle" fill="#475569">10-cycle latency</text>
+
+  <g font-size="11" text-anchor="middle" fill="#1f2937">
+    <!-- request register -->
+    <rect x="140" y="55" width="110" height="46" rx="4" fill="white" stroke="#1f2937"/>
+    <text x="195" y="74" font-weight="bold">Request Regs</text>
+    <text x="195" y="90" font-size="9" fill="#475569">tag | index | word</text>
+    <!-- RAMs -->
+    <rect x="280" y="55" width="110" height="34" rx="4" fill="white" stroke="#1f2937"/>
+    <text x="335" y="76" font-weight="bold">Tag RAM</text>
+    <rect x="280" y="97" width="52" height="34" rx="4" fill="white" stroke="#1f2937"/>
+    <text x="306" y="118" font-weight="bold" font-size="10">Valid</text>
+    <rect x="338" y="97" width="52" height="34" rx="4" fill="#fee2e2" stroke="#b91c1c"/>
+    <text x="364" y="118" font-weight="bold" font-size="10">Dirty</text>
+    <rect x="280" y="140" width="110" height="46" rx="4" fill="white" stroke="#1f2937"/>
+    <text x="335" y="160" font-weight="bold">Cache Data RAM</text>
+    <text x="335" y="175" font-size="9" fill="#475569">16 x 128 bit</text>
+    <!-- comparator -->
+    <rect x="420" y="55" width="100" height="46" rx="4" fill="white" stroke="#1f2937"/>
+    <text x="470" y="75" font-weight="bold">Tag</text>
+    <text x="470" y="90" font-weight="bold">Comparator</text>
+    <!-- FSM -->
+    <rect x="180" y="230" width="210" height="56" rx="6" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.4"/>
+    <text x="285" y="252" font-weight="bold">Write-Back FSM</text>
+    <text x="285" y="270" font-size="8" fill="#475569">IDLE · COMPARE · WRITE_BACK · ALLOCATE</text>
+    <!-- mem interface -->
+    <rect x="420" y="160" width="100" height="80" rx="4" fill="white" stroke="#1f2937"/>
+    <text x="470" y="190" font-weight="bold">Memory</text>
+    <text x="470" y="205" font-weight="bold">Interface</text>
+    <text x="470" y="222" font-size="9" fill="#475569">addr mux, counters</text>
+  </g>
+
+  <g stroke="#1f2937" stroke-width="1.2" fill="none">
+    <path d="M92,170 L140,90" marker-end="url(#a)"/>
+    <path d="M250,72 L280,72" marker-end="url(#a)"/>
+    <path d="M250,92 L270,92 L270,114 L280,114" marker-end="url(#a)"/>
+    <path d="M250,96 L262,96 L262,163 L280,163" marker-end="url(#a)"/>
+    <path d="M390,72 L420,72" marker-end="url(#a)"/>
+    <path d="M306,131 L306,136 L410,136 L410,92 L420,92" marker-end="url(#a)"/>
+    <!-- hit, dirty to FSM -->
+    <path d="M470,101 L470,130 L545,130 L545,300 L360,300 L360,286" marker-end="url(#a)"/>
+    <path d="M390,114 L400,114 L400,250 L390,250" marker-end="url(#a)"/>
+    <!-- data to mem if -->
+    <path d="M390,170 L420,170" marker-end="url(#a)"/>
+    <path d="M420,230 L398,230 L398,186 L390,180" marker-end="url(#a)"/>
+    <!-- FSM to mif -->
+    <path d="M390,270 L470,270 L470,240" marker-end="url(#a)"/>
+    <!-- FSM ctrl to rams -->
+    <path d="M230,230 L230,200 L280,170" marker-end="url(#a)"/>
+    <!-- mem if <-> memory -->
+    <path d="M520,180 L580,180" marker-end="url(#a)"/>
+    <path d="M580,215 L520,215" marker-end="url(#a)"/>
+    <!-- data to CPU -->
+    <path d="M280,182 L160,182 L92,205" marker-end="url(#a)"/>
+    <path d="M180,270 L130,270 L92,230" marker-end="url(#a)"/>
+  </g>
+  <g font-size="9" fill="#475569">
+    <text x="8" y="126">req, we, addr, wdata</text>
+    <text x="478" y="122">hit</text>
+    <text x="403" y="160">dirty</text>
+    <text x="400" y="313">hit, dirty, mem_ready</text>
+    <text x="400" y="263">mem_rd / mem_wr</text>
+    <text x="236" y="212">refill, we_word,</text>
+    <text x="236" y="222">dirty_set</text>
+    <text x="524" y="164">req, we,</text>
+    <text x="524" y="175">addr, wdata</text>
+    <text x="526" y="228">rdata,</text>
+    <text x="526" y="238">ready</text>
+    <text x="150" y="196">rdata</text>
+    <text x="96" y="290">cpu_ready</text>
+  </g>
+</svg>
