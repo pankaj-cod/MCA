@@ -332,8 +332,118 @@ module tb_cache;
         check(memword_wb(mk(24'h0,4'd2,2'd3)) == 32'hBEEF_0023, "T8 evicted dirty word in memory");
         check(u_wb.u_dirty.dirty[2] && u_wb.u_tag.mem[2] == 24'h5, "T8 new line dirty with new tag");
 
-        
-        $display("\nDirected tests T0-T8 complete. All checks passed.");
+        // T9 -------------------------------------------------- readback
+        $display("T9  read hit returns freshly written data");
+        rd(mk(24'h5, 4'd2, 2'd0));
+        rd(mk(24'h5, 4'd2, 2'd1));
+        rd(mk(24'h0, 4'd2, 2'd3));      // miss, evicts dirty tag-5 line
+
+        // T10 ------------------------------------------------- full dirty sweep
+        $display("T10 dirty all 16 lines, then evict all 16 -> 16 write-backs");
+        for (i = 0; i < 16; i = i + 1) wr(mk(24'h2, i[3:0], 2'd1), 32'h2200_0000 | i);
+        check(dirty_lines(0) == 16, "T10 all 16 lines dirty");
+        p = wb_wbs;
+        for (i = 0; i < 16; i = i + 1) rd(mk(24'h3, i[3:0], 2'd0));
+        check(wb_wbs - p == 16, "T10 exactly 16 write-backs on sweep");
+        check(dirty_lines(0) == 0, "T10 all lines clean after sweep");
+        for (i = 0; i < 16; i = i + 1) rd(mk(24'h2, i[3:0], 2'd1));   // data survived
+
+        coherence_check(1024, "directed");
+
+        // T11 ------------------------------------------------- reset
+        $display("T11 synchronous reset invalidates and cleans all lines");
+        wr(mk(24'h4, 4'd7, 2'd0), 32'h7777_7777);
+        cold_start;
+        check(u_wb.u_valid.valid == 0 && u_wb.u_dirty.dirty == 0, "T11 reset clears valid & dirty");
+        check(wb_hits == 0 && wbm_rd_words == 0, "T11 counters cleared");
+
+        $dumpoff;     // keep the VCD small: waveforms only for Part A
+
+        // ===================================================== PART B
+        $display("\n==================== PART B : MEMORY-TRAFFIC WORKLOADS ===========");
+        csv = $fopen("traffic.csv", "w");
+        $fdisplay(csv, "workload,accesses,wb_hits,wb_misses,wb_writebacks,wb_rd_txn,wb_wr_txn,wb_rd_words,wb_wr_words,wb_flush_words,wb_cycles,wt_hits,wt_misses,wt_rd_txn,wt_wr_txn,wt_rd_words,wt_wr_words,wt_cycles");
+
+        // W1: loop read-modify-write over a 32-word array, 8 passes
+        cold_start;
+        for (p = 0; p < 8; p = p + 1)
+            for (i = 0; i < 32; i = i + 1) begin
+                a = i << 2;
+                rd(a);
+                wr(a, golden[i] + 1);
+            end
+        coherence_check(2048, "W1");
+        report_workload("W1 Loop RMW (32w x8)");
+
+        // W2: sequential read stream, 4 KiB
+        cold_start;
+        for (i = 0; i < 1024; i = i + 1) rd(i << 2);
+        coherence_check(2048, "W2");
+        report_workload("W2 Seq read stream");
+
+        // W3: random 70% read / 30% write over 2 KiB
+        cold_start;
+        for (i = 0; i < 1000; i = i + 1) begin
+            r = $random(seed);
+            a = r & 32'h0000_07FC;
+            if (({$random(seed)} % 10) < 3) wr(a, $random(seed)); else rd(a);
+        end
+        coherence_check(2048, "W3");
+        report_workload("W3 Random 70R/30W 2KiB");
+
+        // W3b: random 70% read / 30% write over 512 B (2x cache size)
+        cold_start;
+        for (i = 0; i < 1000; i = i + 1) begin
+            r = $random(seed);
+            a = r & 32'h0000_01FC;
+            if (({$random(seed)} % 10) < 3) wr(a, $random(seed)); else rd(a);
+        end
+        coherence_check(2048, "W3b");
+        report_workload("W3b Random 70R/30W 512B");
+
+        // W4: small working set (fits cache), 50% writes
+        cold_start;
+        for (i = 0; i < 1000; i = i + 1) begin
+            r = $random(seed);
+            a = 32'h0000_0400 | (r & 32'h0000_007C);
+            if (({$random(seed)} % 2) == 0) wr(a, $random(seed)); else rd(a);
+        end
+        coherence_check(2048, "W4");
+        report_workload("W4 Hot set 128B 50W");
+
+        // W5: write-once memset stream, 4 KiB
+        cold_start;
+        for (i = 0; i < 1024; i = i + 1) wr(i << 2, 32'h5E7_0000 | i);
+        coherence_check(2048, "W5");
+        report_workload("W5 Seq write stream");
+
+        // W6: conflict thrash - alternating stores to 2 blocks, same index
+        cold_start;
+        for (i = 0; i < 256; i = i + 1)
+            wr((i[0] ? 32'h0000_0140 : 32'h0000_0040), i);
+        coherence_check(2048, "W6");
+        report_workload("W6 Conflict thrash");
+
+        $fclose(csv);
+
+        // ===================================================== SUMMARY
+        $display("\n==================== FSM COVERAGE (write-back controller) =========");
+        $display("  cycles in IDLE=%0d COMPARE=%0d WRITE_BACK=%0d ALLOCATE=%0d",
+                 st_cycles[0], st_cycles[1], st_cycles[2], st_cycles[3]);
+        $display("  transitions: IDLE>CMP=%b CMP>IDLE=%b CMP>WB=%b CMP>ALLOC=%b WB>ALLOC=%b ALLOC>CMP=%b",
+                 tr_seen[0], tr_seen[1], tr_seen[2], tr_seen[3], tr_seen[4], tr_seen[5]);
+        check(tr_seen == 6'b111111, "all 6 legal FSM transitions exercised");
+        check(illegal == 0, "no illegal FSM transitions");
+
+        $display("\n==================== RESULT ======================================");
+        $display("  checks=%0d  errors=%0d  ->  %0s", checks, errors,
+                 errors == 0 ? "ALL TESTS PASSED" : "TESTS FAILED");
         $finish;
+    end
+
+    // safety timeout
+    initial begin
+        #50_000_000;
+        $display("TIMEOUT"); $finish;
     end
 endmodule
