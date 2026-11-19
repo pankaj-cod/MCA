@@ -1,3 +1,6 @@
+// ============================================================================
+// tag_comparator.v : hit = valid AND (stored tag == requested tag)
+// ============================================================================
 `timescale 1ns/1ps
 `include "cache_params.vh"
 
@@ -7,6 +10,5 @@ module tag_comparator (
     input  wire              valid,
     output wire              hit
 );
-    // Basic tag equality check
-    assign hit = (req_tag == stored_tag) && valid;
+    assign hit = valid & (req_tag == stored_tag);
 endmodule
