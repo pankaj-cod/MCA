@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 380" width="560" height="380" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f2937"/>
+    </marker>
+  </defs>
+  <rect width="560" height="380" fill="white"/>
+  <!-- reset arrow -->
+  <line x1="40" y1="70" x2="78" y2="70" stroke="#1f2937" stroke-width="1.4" marker-end="url(#ah)"/>
+  <text x="8" y="64" font-size="11" fill="#1f2937">rst</text>
+
+  <!-- states -->
+  <g font-size="13" font-weight="bold" text-anchor="middle" fill="#1f2937">
+    <ellipse cx="140" cy="70" rx="60" ry="30" fill="#f3f4f6" stroke="#1f2937" stroke-width="1.6"/>
+    <text x="140" y="75">IDLE</text>
+    <ellipse cx="420" cy="70" rx="72" ry="30" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+    <text x="420" y="75">COMPARE TAG</text>
+    <ellipse cx="140" cy="300" rx="72" ry="30" fill="#fee2e2" stroke="#b91c1c" stroke-width="1.6"/>
+    <text x="140" y="305">WRITE-BACK</text>
+    <ellipse cx="420" cy="300" rx="66" ry="30" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+    <text x="420" y="305">ALLOCATE</text>
+  </g>
+
+  <g fill="none" stroke="#1f2937" stroke-width="1.4">
+    <!-- IDLE -> COMPARE -->
+    <path d="M200,60 L346,60" marker-end="url(#ah)"/>
+    <!-- COMPARE -> IDLE (hit) -->
+    <path d="M350,82 C300,112 240,112 196,84" marker-end="url(#ah)"/>
+    <!-- COMPARE -> ALLOCATE (miss, clean) -->
+    <path d="M440,99 L440,268" marker-end="url(#ah)"/>
+    <!-- COMPARE -> WRITE_BACK (miss, dirty) -->
+    <path d="M372,93 L196,280" marker-end="url(#ah)"/>
+    <!-- WRITE_BACK -> ALLOCATE -->
+    <path d="M212,300 L352,300" marker-end="url(#ah)"/>
+    <!-- ALLOCATE -> COMPARE -->
+    <path d="M396,272 L396,101" marker-end="url(#ah)"/>
+    <!-- self loops -->
+    <path d="M100,94 C70,140 120,150 128,100" marker-end="url(#ah)"/>
+    <path d="M98,325 C70,370 130,375 132,331" marker-end="url(#ah)"/>
+    <path d="M456,325 C480,372 420,378 424,331" marker-end="url(#ah)"/>
+  </g>
+
+  <g font-size="10.5" fill="#1f2937">
+    <text x="273" y="52" text-anchor="middle">cpu_req / latch request</text>
+    <text x="236" y="124" text-anchor="middle">hit / read: return word</text>
+    <text x="236" y="137" text-anchor="middle">write: update word, dirty&#8592;1</text>
+    <text x="446" y="175">miss &amp; (!valid | !dirty)</text>
+    <text x="446" y="189" fill="#6b7280">no write-back needed</text>
+    <text x="210" y="200" text-anchor="end">miss &amp; valid &amp; dirty</text>
+    <text x="210" y="213" text-anchor="end" fill="#6b7280">old block must be saved</text>
+    <text x="282" y="292" text-anchor="middle">mem_ready</text>
+    <text x="282" y="318" text-anchor="middle" fill="#6b7280">victim block in memory</text>
+    <text x="388" y="190" text-anchor="end">mem_ready /</text>
+    <text x="388" y="203" text-anchor="end">write line+tag,</text>
+    <text x="388" y="216" text-anchor="end">valid&#8592;1, dirty&#8592;0</text>
+    <text x="30" y="150" fill="#6b7280">!cpu_req</text>
+    <text x="40" y="372" fill="#6b7280">!mem_ready (mem_wr=1)</text>
+    <text x="470" y="372" fill="#6b7280" text-anchor="middle">!mem_ready (mem_rd=1)</text>
+  </g>
+</svg>

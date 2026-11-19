@@ -1,5 +1,8 @@
 % ============================================================================
 %  Phase I Report -- Write-Back Cache Controller (IEEE conference format)
+%  Compile on Overleaf (pdfLaTeX) or locally:  pdflatex report && pdflatex report
+%  Figures are read from ../docs/figures/ (copy that folder next to this file
+%  on Overleaf and change \graphicspath if needed).
 % ============================================================================
 \documentclass[conference]{IEEEtran}
 \IEEEoverridecommandlockouts
@@ -43,17 +46,163 @@ direct-mapped \emph{write-back, write-allocate} cache controller in synthesizabl
 Verilog HDL. The design is partitioned into a Cache Data RAM, Tag RAM, Valid RAM,
 Dirty-Bit RAM, Tag Comparator, a four-state controller FSM (\textsc{Idle},
 \textsc{Compare}, \textsc{Write-Back}, \textsc{Allocate}) and a block-transfer
-Memory Interface.
+Memory Interface. A dirty bit per line records whether the cached block differs
+from memory, so write hits are absorbed by the cache and a block is written to
+memory only when a dirty line is evicted---strictly \emph{before} the new block is
+refilled. A write-through, no-write-allocate cache with identical geometry is
+built as a reference. A self-checking directed testbench with a golden memory
+model executes 6\,494 checks with zero failures and covers all four controller
+states and all six legal transitions. On workloads with temporal write locality
+the write-back cache moves 78--88\% fewer words to and from memory and finishes
+3.7--3.8$\times$ faster than the write-through cache, while streaming and
+conflict-heavy store patterns expose the cost of write-allocation, which motivates
+the Phase II improvements.
 \end{abstract}
 
-\section{Introduction}
-Modern processors execute orders of magnitude faster than off-chip dynamic RAM can
-respond, making the memory wall one of the defining bottlenecks of computer
-architecture. Caches alleviate this latency gap by exploiting temporal and spatial
-locality.
+\begin{IEEEkeywords}
+cache memory, write-back, write-through, dirty bit, cache controller, finite state
+machine, Verilog HDL, memory traffic
+\end{IEEEkeywords}
 
-\section{System Architecture Overview}
-The design targets a 32-bit byte address space partitioned as follows:
-24-bit Tag [31:8], 4-bit Index [7:4], 2-bit Word select [3:2], and 2-bit Byte offset [1:0].
+% ----------------------------------------------------------------------------
+\section{Introduction}
+The gap between processor and DRAM speed makes the cache hierarchy the main lever
+for performance and for memory-bandwidth consumption~\cite{hp_quant,jacob}.
+Besides deciding \emph{what} to keep, a cache must decide \emph{when} a store
+reaches main memory. A \emph{write-through} cache forwards every store,
+which keeps memory always up to date but generates one bus transaction per store.
+A \emph{write-back} cache updates only its own copy and marks the line
+\emph{dirty}; memory is updated once, when the dirty line is replaced. Repeated
+stores to the same block therefore cost a single block write~\cite{smith82,goodman83}.
+
+The price of write-back is controller complexity: a miss that selects a dirty
+victim must first transfer the old block to memory and only then refill the line,
+and the dirty bit must be set, cleared and tested at exactly the right moments.
+This project implements that controller in RTL and checks it against a
+write-through baseline.
+
+\textbf{Objectives.} (i)~Implement read hits and misses; (ii)~implement write hits
+using dirty bits; (iii)~handle dirty-block eviction, writing the old block to memory
+before refill; (iv)~verify every controller state and transition; and (v)~compare
+memory traffic against write-through behaviour.
+
+% ----------------------------------------------------------------------------
+\section{Literature Review}
+\textbf{Cache fundamentals and write policies.} Smith's survey~\cite{smith82}
+established the vocabulary used today: placement, replacement, line size, and
+the write-through versus copy-back (write-back) choice. It observed that
+write-back reduces memory traffic but complicates consistency, because memory may
+hold stale data. Goodman~\cite{goodman83} studied caches specifically as a means
+of reducing processor--memory traffic in shared-bus systems and showed that
+copy-back caches cut bus traffic far more than write-through ones, the starting
+point of later snooping-coherence protocols.
+
+\textbf{Write-miss policies.} Jouppi~\cite{jouppi93} separated the write-hit
+policy (write-through or write-back) from the write-miss policy (fetch-on-write,
+write-allocate, write-validate, write-around, write-invalidate). He showed that
+write-back with fetch-on-write reads blocks that are about to be overwritten
+entirely, and that no-fetch-on-write variants with per-word valid bits remove
+much of that traffic. This is exactly the effect our streaming-store experiment
+reproduces (Section~\ref{sec:prelim}).
+
+\textbf{Direct-mapped organisation.} Hill~\cite{hill88} argued that direct-mapped
+caches, despite higher miss ratios, can win on access time and simplicity because
+the tag check and data read happen in parallel with no way-selection multiplexer.
+Jouppi~\cite{jouppi90} showed that their main weakness, conflict misses, can be
+reduced with small victim caches. We use direct mapping for the Phase I prototype
+and use a conflict-thrash workload to measure that weakness.
+
+\textbf{Controller design.} Patterson and Hennessy~\cite{ph_cod} give the classic
+four-state FSM for a simple write-back cache (Idle, Compare Tag, Write-Back,
+Allocate) with a blocking CPU interface and a multi-cycle memory. Our controller
+follows that structure. Hennessy and Patterson~\cite{hp_quant} and Jacob
+\emph{et~al.}~\cite{jacob} quantify the benefits of write buffers, dirty bits and
+write-back in modern memory hierarchies.
+
+\textbf{Write-back scheduling in modern systems.} In current last-level caches the
+question is \emph{when} dirty data is written back. Eager write-back~\cite{lee00}
+writes dirty lines that are likely to be evicted early, while the bus is idle,
+to smooth bursts. The virtual write queue~\cite{stuecheli10} coordinates
+last-level-cache write-backs with DRAM scheduling to reduce read--write turnaround
+penalties. These techniques still rely on the basic dirty-bit mechanism
+implemented here.
+
+\textbf{Gap addressed.} Textbooks describe the write-back FSM at the
+behavioural level. This project provides a complete, modular, synthesizable RTL
+implementation with a self-checking verification environment and a
+cycle-accurate, word-level traffic comparison against write-through using the same
+datapath blocks.
+
+% ----------------------------------------------------------------------------
+\section{Proposed Solution}
+
+\subsection{Cache Organisation}
+The cache is direct-mapped with 16 lines of 16~bytes (four 32-bit words), giving
+256~bytes of data. A 32-bit byte address is split as
+\begin{equation}
+\underbrace{A[31{:}8]}_{\text{tag (24)}}\;|\;
+\underbrace{A[7{:}4]}_{\text{index (4)}}\;|\;
+\underbrace{A[3{:}2]}_{\text{word}}\;|\;
+\underbrace{A[1{:}0]}_{\text{byte}}.
+\end{equation}
+The policy is \emph{write-back} on write hits and \emph{write-allocate}
+(fetch-on-write) on write misses. Main memory is a block-transfer model with a
+fixed latency of 10 cycles per transaction. All sizes are \texttt{`define}
+parameters in \texttt{cache\_params.vh}.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.72\textwidth]{fig_block.png}
+\caption{Block diagram of the write-back cache (\texttt{wb\_cache\_top}).}
+\label{fig:block}
+\end{figure*}
+
+\subsection{RTL Modules}
+Fig.~\ref{fig:block} shows the datapath. Each suggested module is a separate
+Verilog file:
+\begin{itemize}
+\item \textbf{Cache Data RAM} -- $16\times128$-bit array with combinational read
+and synchronous write of a full line (refill) or a single word (store hit).
+\item \textbf{Tag RAM} -- $16\times24$-bit array, written on refill.
+\item \textbf{Valid RAM} -- 16 bits, cleared by reset, set on refill.
+\item \textbf{Dirty-Bit RAM} -- 16 bits. \emph{Set} on a write hit,
+\emph{cleared} on refill and on reset; clear has priority.
+\item \textbf{Tag Comparator} -- $\textit{hit}=\textit{valid}\wedge
+(\textit{tag}_{\text{stored}}=\textit{tag}_{\text{req}})$.
+\item \textbf{Write-Back FSM} -- the controller (Section~\ref{sec:fsm}).
+\item \textbf{Memory Interface} -- builds the bus request. On a write-back the
+address is reconstructed from the \emph{victim} tag stored in the Tag RAM and
+the current index, $\{\textit{tag}_{\text{victim}},\textit{index}\}$. On a
+refill it is the requested block address. It also counts read and write
+bursts.
+\end{itemize}
+Request registers capture address, data and R/W when a request is accepted, so
+the CPU-side signals may change while the miss is serviced.
+
+\subsection{Controller FSM}\label{sec:fsm}
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\columnwidth]{fig_fsm.png}
+\caption{Write-back cache controller state diagram.}
+\label{fig:fsm}
+\end{figure}
+
+Fig.~\ref{fig:fsm} gives the state diagram:
+\begin{itemize}
+\item \textsc{Idle}: wait for \texttt{cpu\_req}; latch the request.
+\item \textsc{Compare}: on a hit, a read returns the word and a write updates
+it and sets the dirty bit; both return to \textsc{Idle} (2-cycle hit latency).
+On a miss, if the victim line is valid \emph{and} dirty go to
+\textsc{Write-Back}, otherwise go directly to \textsc{Allocate}.
+\item \textsc{Write-Back}: drive the victim block to memory and wait for
+\texttt{mem\_ready}. The old data is therefore saved before it can be overwritten.
+\item \textsc{Allocate}: read the requested block. On \texttt{mem\_ready} write
+line and tag, set valid, clear dirty, and return to \textsc{Compare}. The
+re-compare now hits and completes the original read or write, so a store miss
+leaves the new line dirty.
+\end{itemize}
+A \texttt{first\_cmp} flag ensures that each request is counted as exactly one hit
+or one miss, even though a miss passes through \textsc{Compare} twice.
+
 
 \end{document}
