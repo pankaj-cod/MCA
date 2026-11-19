@@ -1,5 +1,17 @@
 // ============================================================================
 // mem_interface.v : Cache <-> main-memory block-transfer interface
+// ----------------------------------------------------------------------------
+//  Bus protocol (to main memory):
+//    mem_req   : held high for the whole transaction
+//    mem_we    : 1 = write, 0 = read
+//    mem_addr  : block address (byte address >> 4)
+//    mem_wdata : 128-bit line for writes
+//    mem_wmask : per-word write enable (4'b1111 = full block)
+//    mem_ready : one-cycle pulse when the transaction completes
+//
+//  For a write-back the address is rebuilt from the VICTIM tag stored in
+//  the tag RAM and the current index; for a refill it is the requested
+//  block address. Also counts bus transactions issued by this cache.
 // ============================================================================
 `timescale 1ns/1ps
 `include "cache_params.vh"
@@ -31,7 +43,7 @@ module mem_interface (
     assign mem_we    = mem_wr;
     assign mem_addr  = mem_wr ? {victim_tag, req_idx} : {req_tag, req_idx};
     assign mem_wdata = victim_line;
-    assign mem_wmask = 4'b1111;
+    assign mem_wmask = {`WORDS_PB{1'b1}};
     assign done      = mem_ready;
 
     always @(posedge clk) begin
