@@ -1,0 +1,40 @@
+VCD info: dumpfile wb_cache.vcd opened for output.
+
+==================== PART A : DIRECTED TESTS ====================
+T0  reset: all lines invalid and clean
+T1  read miss, invalid line -> ALLOCATE (no write-back)
+T2  read hit on same block (other word)
+T3  write hit -> data updated in cache only, DIRTY set
+T4  3 more writes to the dirty line -> zero WB traffic
+T5  read conflict miss on DIRTY line -> WRITE_BACK then ALLOCATE
+T6  read back evicted data (clean victim -> no write-back)
+T7  write miss on invalid line -> allocate + write (write-allocate)
+T8  write miss on DIRTY line -> WRITE_BACK, ALLOCATE, write
+T9  read hit returns freshly written data
+T10 dirty all 16 lines, then evict all 16 -> 16 write-backs
+  coherence[directed]: WB mismatches=0  WT mismatches=0 (1024 words)
+T11 synchronous reset invalidates and cleans all lines
+
+==================== PART B : MEMORY-TRAFFIC WORKLOADS ===========
+  coherence[W1]: WB mismatches=0  WT mismatches=0 (2048 words)
+  W1 Loop RMW (32w x8)       acc=  512 | WB: hit= 504 miss=   8 wb=   0 rdW=   32 wrW=    0 tot=   32 dirtyLeft= 8 cyc=  1128 | WT: hit= 504 miss=   8 rdW=   32 wrW=  256 tot=  288 cyc=  4200
+  coherence[W2]: WB mismatches=0  WT mismatches=0 (2048 words)
+  W2 Seq read stream         acc= 1024 | WB: hit= 768 miss= 256 wb=   0 rdW= 1024 wrW=    0 tot= 1024 dirtyLeft= 0 cyc=  5376 | WT: hit= 768 miss= 256 rdW= 1024 wrW=    0 tot= 1024 cyc=  5376
+  coherence[W3]: WB mismatches=0  WT mismatches=0 (2048 words)
+  W3 Random 70R/30W 2KiB     acc= 1000 | WB: hit= 127 miss= 873 wb= 285 rdW= 3492 wrW= 1140 tot= 4632 dirtyLeft= 4 cyc= 16769 | WT: hit= 128 miss= 872 rdW= 2396 wrW=  302 tot= 2698 cyc= 13411
+  coherence[W3b]: WB mismatches=0  WT mismatches=0 (2048 words)
+  W3b Random 70R/30W 512B    acc= 1000 | WB: hit= 486 miss= 514 wb= 221 rdW= 2056 wrW=  884 tot= 2940 dirtyLeft= 9 cyc= 11334 | WT: hit= 494 miss= 506 rdW= 1388 wrW=  295 tot= 1683 cyc= 10051
+  coherence[W4]: WB mismatches=0  WT mismatches=0 (2048 words)
+  W4 Hot set 128B 50W        acc= 1000 | WB: hit= 992 miss=   8 wb=   0 rdW=   32 wrW=    0 tot=   32 dirtyLeft= 8 cyc=  2104 | WT: hit= 983 miss=  17 rdW=   32 wrW=  498 tot=  530 cyc=  8080
+  coherence[W5]: WB mismatches=0  WT mismatches=0 (2048 words)
+  W5 Seq write stream        acc= 1024 | WB: hit= 768 miss= 256 wb= 240 rdW= 1024 wrW=  960 tot= 1984 dirtyLeft=16 cyc=  8256 | WT: hit=   0 miss=1024 rdW=    0 wrW= 1024 tot= 1024 cyc= 14336
+  coherence[W6]: WB mismatches=0  WT mismatches=0 (2048 words)
+  W6 Conflict thrash         acc=  256 | WB: hit=   0 miss= 256 wb= 255 rdW= 1024 wrW= 1020 tot= 2044 dirtyLeft= 1 cyc=  6900 | WT: hit=   0 miss= 256 rdW=    0 wrW=  256 tot=  256 cyc=  3584
+
+==================== FSM COVERAGE (write-back controller) =========
+  cycles in IDLE=33011 COMPARE=8104 WRITE_BACK=12240 ALLOCATE=26712
+  transitions: IDLE>CMP=1 CMP>IDLE=1 CMP>WB=1 CMP>ALLOC=1 WB>ALLOC=1 ALLOC>CMP=1
+
+==================== RESULT ======================================
+  checks=6494  errors=0  ->  ALL TESTS PASSED
+../tb/tb_cache.v:441: $finish called at 800860000 (1ps)
