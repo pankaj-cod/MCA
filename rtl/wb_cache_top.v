@@ -3,6 +3,9 @@
 // ----------------------------------------------------------------------------
 //  Integrates: Cache Data RAM, Tag RAM, Valid RAM, Dirty-Bit RAM,
 //              Tag Comparator, Write-Back FSM, Memory Interface.
+//
+//  CPU protocol: hold cpu_req (with cpu_we/addr/wdata) until cpu_ready
+//  pulses for one cycle. cpu_rdata is valid while cpu_ready is high.
 // ============================================================================
 `timescale 1ns/1ps
 `include "cache_params.vh"
@@ -102,7 +105,7 @@ module wb_cache_top (
             cpu_ready <= 0;  cpu_rdata <= 0;
             hit_cnt   <= 0;  miss_cnt <= 0; wb_cnt <= 0;
         end else begin
-            if (cpu_req) begin
+            if (latch_req) begin
                 req_addr  <= cpu_addr;
                 req_we    <= cpu_we;
                 req_wdata <= cpu_wdata;

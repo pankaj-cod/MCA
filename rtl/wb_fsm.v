@@ -2,7 +2,21 @@
 // ============================================================================
 // wb_fsm.v : Write-Back Cache Controller FSM
 // ----------------------------------------------------------------------------
-//  States: IDLE, COMPARE, WRITE_BACK, ALLOCATE
+//  States
+//   IDLE       : wait for a CPU request; latch address / data / R-W
+//   COMPARE    : tag check.
+//                  hit  & read  -> return word, IDLE
+//                  hit  & write -> write word, set DIRTY, IDLE
+//                  miss & victim dirty -> WRITE_BACK
+//                  miss & victim clean -> ALLOCATE
+//   WRITE_BACK : write the old (dirty) block to memory, wait mem_ready
+//                  -> ALLOCATE
+//   ALLOCATE   : read the new block from memory, wait mem_ready;
+//                  write line + tag, set VALID, clear DIRTY -> COMPARE
+//                (COMPARE then hits and completes the original request:
+//                 write-allocate policy for stores)
+//
+//  Outputs are Mealy-style combinational controls for the datapath.
 // ============================================================================
 module wb_fsm (
     input  wire       clk,
@@ -36,6 +50,8 @@ module wb_fsm (
                ALLOCATE   = 2'd3;
 
     reg [1:0] next_state;
+    // `first_cmp` distinguishes the first tag-check of a request from the
+    // re-check after a refill, so hits/misses are counted exactly once.
     reg       first_cmp;
 
     always @(posedge clk) begin
