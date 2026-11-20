@@ -19,7 +19,7 @@ and compared against a write-through, no-write-allocate reference cache.
 | Member | Roll No. | Contribution |
 |---|---|---|
 | Pankaj Upadhyay | 2401010317 | Data RAM, Tag RAM, Valid RAM, Dirty-Bit RAM, Tag Comparator, `cache_params.vh` |
-| Prakhar Rawat | 2401020045 | Write-back FSM (`wb_fsm.v`), state diagram, top-level integration |
+| Prakhar Rawat | 2401020045 | Write-back FSM , state diagram, top-level integration |
 | Harshit Kudhial | 2401010182 | Memory interface, main-memory model + traffic counters, write-through cache |
 | Om Chimurkar | 2401010306 | Testbench, golden model, directed tests, coherence + FSM coverage, waveforms |
 | Vishuti Jamwal | 2401010506 | Workloads, traffic analysis, figure scripts, literature review, report, video |
