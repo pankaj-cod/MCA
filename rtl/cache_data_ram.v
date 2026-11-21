@@ -1,3 +1,9 @@
+// ============================================================================
+// cache_data_ram.v : Cache Data RAM (NLINES x 128-bit lines)
+//  - Asynchronous (combinational) read of the whole line at `idx`
+//  - Synchronous write of either a full line (refill) or one 32-bit word
+//    (CPU write hit). A line write has priority over a word write.
+// ============================================================================
 `timescale 1ns/1ps
 `include "cache_params.vh"
 
@@ -24,7 +30,7 @@ module cache_data_ram (
     always @(posedge clk) begin
         if (we_line)
             mem[idx] <= line_in;
-        if (we_word)
+        else if (we_word)
             mem[idx][word_sel*`DATA_W +: `DATA_W] <= word_in;
     end
 endmodule
