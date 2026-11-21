@@ -51,8 +51,8 @@ module mem_interface (
             rd_bursts <= 0;
             wr_bursts <= 0;
         end else if (mem_ready) begin
-            if (mem_wr)      wr_bursts <= wr_bursts + 1;
-            else if (mem_rd) rd_bursts <= rd_bursts + 1;
+            if (mem_wr) wr_bursts <= wr_bursts + 1;
+            else        rd_bursts <= rd_bursts + 1;
         end
     end
 endmodule
