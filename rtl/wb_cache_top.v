@@ -1,4 +1,3 @@
-// Fully verified and synthesized for direct-mapped write-back configuration
 // ============================================================================
 // wb_cache_top.v : Direct-mapped WRITE-BACK, WRITE-ALLOCATE cache
 // ----------------------------------------------------------------------------
