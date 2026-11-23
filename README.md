@@ -84,7 +84,7 @@ python3 scripts/make_figures.py    # regenerate waveform + chart SVGs from the s
 ```
 
 ```bash
-gtkwave sim/wb_cache.vcd           # optional: inspect waveforms interactively
+./sim/show_waves.sh                # run sim + open waveforms in Surfer (brew install surfer); key signals preloaded
 ```
 
 ## Verification results

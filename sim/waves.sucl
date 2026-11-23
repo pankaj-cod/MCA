@@ -1,0 +1,20 @@
+# Surfer command file: loads the key signals of the write-back cache
+divider_add CPU
+variable_add tb_cache.clk
+variable_add tb_cache.wb_req
+variable_add tb_cache.wb_we
+variable_add tb_cache.wb_addr
+variable_add tb_cache.wb_wdata
+variable_add tb_cache.wb_rdata
+variable_add tb_cache.wb_ready
+divider_add Controller
+variable_add tb_cache.u_wb.fsm_state
+variable_add tb_cache.u_wb.hit
+variable_add tb_cache.u_wb.valid
+variable_add tb_cache.u_wb.dirty
+divider_add Memory
+variable_add tb_cache.wbm_req
+variable_add tb_cache.wbm_we
+variable_add tb_cache.wbm_addr
+variable_add tb_cache.wbm_ready
+zoom_fit
